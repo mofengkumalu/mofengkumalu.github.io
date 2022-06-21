@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://mofengkumalu.github.io</id>
+    <title>𝔐𝔬𝔣𝔢𝔫𝔤</title>
+    <updated>2022-06-21T02:54:54.484Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://mofengkumalu.github.io"/>
+    <link rel="self" href="https://mofengkumalu.github.io/atom.xml"/>
+    <subtitle>𝔅𝔢𝔩𝔦𝔢𝔣</subtitle>
+    <logo>https://mofengkumalu.github.io/images/avatar.png</logo>
+    <icon>https://mofengkumalu.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2022, 𝔐𝔬𝔣𝔢𝔫𝔤</rights>
+    <entry>
+        <title type="html"><![CDATA[🖥️Web安全 - 常见漏洞]]></title>
+        <id>https://mofengkumalu.github.io/post/Net-Sec-2/</id>
+        <link href="https://mofengkumalu.github.io/post/Net-Sec-2/">
+        </link>
+        <updated>2022-06-06T16:00:00.000Z</updated>
+        <content type="html"><![CDATA[<h3>一、暴力破解</h3>
+<h4>1、概述</h4>
+​ “暴力破解”是一攻击具手段，在web攻击中，一般会使用这种手段对应用系统的认证信息进行获取。其过程就是使用大量的认证信息在认证接口进行尝试登录，直到得到正确的结果。为了提高效率，暴力破解一般会使用带有字典的工具来进行自动化操作。</br>
+理论上来说，大多数系统都是可以被暴力破解的，只要攻击者有足够强大的计算能力和时间，所以断定一个系统是否存在暴力破解漏洞，其条件也不是绝对的。我们说一个web应用系统存在暴力破解漏洞，一般是指该web应用系统没有采用或者采用了比较弱的认证安全策略，导致其被暴力破解的“可能性”变的比较高。</br>
+<h4>2、基于表单的暴力破解</h4>
+​ 条件：用户没有任何安全验证，可直接抓包进行暴力破解。</br>
+<h4>3、验证码绕过</h4>
+<p><a href="https://imgtu.com/i/O3kKXQ"><img src="https://s1.ax1x.com/2022/05/08/O3kKXQ.png" alt="O3kKXQ.png" border="0" /></a></p>
+<p>验证码绕过（on server）：验证码校验在服务端完成，但是验证码存在时效性，这个时候我们可以在这个时效内进行抓包实现短时间内的验证码绕过。</br><br>
+​ 验证码绕过（on client）：在前端进行验证码的校验，这个时候驶入正确的验证码提交，进行抓包后，我们通过修改密码和账号发现我们不需要再对验证码进行修改，从而绕过了验证码，实现暴力破解。</br></p>
+<h4>4、token防爆破？</h4>
+<p><a href="https://imgtu.com/i/O3krA1"><img src="https://s1.ax1x.com/2022/05/08/O3krA1.png" alt="O3krA1.png" border="0" /></a></p>
+<p>由于token值输出在了前端的源码中，容易被获取，因此也就失去了防爆破的意义。我们可以在每次暴力破解的过程中获取到前端页面生成的token的值，从而实现暴力破解。</br></p>
+<h4>5、安全策略</h4>
+​ 1.是否要求用户设置复杂的密码；</br>
+​ 2.是否每次认证都使用安全的验证码（想想你买火车票时输的验证码～）或者手机app；</br>
+​ 3.是否对尝试登录的行为进行判断和限制（如：连续5次错误登录，进行账号锁定或IP地址锁定等）；</br>
+​ 4.是否采用了双因素认证；</br>
+<h3>二、XSS</h3>
+<h4>1、基本概念和原理介绍</h4>
+跨站点脚本攻击，指攻击者通过篡改网页，嵌入恶意脚本程序，在用户浏览网页时，控制用户浏览器进行恶意操作的一种攻击方式。</br>
+Cross-Site Scripting 简称为“CSS”，为避免与前端叠成样式表的缩写"CSS"冲突，故又称XSS。一般XSS可以分为如下几种常见类型：</br>
+1.反射性XSS</br>
+交互的数据一般不会被存在在数据库里面，一次性，所见即所得，一般出现在查询</br>
+​ 2.存储型XSS</br>
+交互的数据会被存在在数据库里面，永久性存储，一般出现在留言板，注册等页面。</br>
+3.DOM型XSS</br>
+不与后台服务器产生数据交互，是一种通过DOM操作前端代码输出的时候产生的问题，一次性也属于反射型。</br>
+<p><a href="https://imgtu.com/i/O3kfnH"><img src="https://s1.ax1x.com/2022/05/08/O3kfnH.png" alt="O3kfnH.png" border="0" /></a></p>
+<p>形成原因<br>
+形成xss漏洞的主要原因是程序对输入输出的控制不够严格，导致“精心设计”的脚本输入后，在输出到前端时被浏览器当作有效代码执行从而产生危害。</br></p>
+<h4>2、跨站脚本漏洞测试流程</h4>
+（1）在目标站点上找到输入点，比如查询接口，留言板等。</br>
+（2）输入一组"特殊字符+唯一识别字符"，点击提交后，查看返回的源码，是否有做对应的处理。</br>
+（3）通过搜索定位唯一字符，结合唯一字符前后语法确认是否可以执行js的条件（构造闭合）。</br>
+（4）提交构造的脚本代码（以及各种绕过姿势），看是否可以成功执行，如果成功执行则说明存在现在xss漏洞；</br>
+TIPS：</br>
+（1）一般查询接口容易出现反射型xss，留言板容易出现存储型xss；</br>
+（2）由于后台可能存在过滤措施，构成的script可能会被过滤掉，二无法生效，或者环境限制了执行（浏览器）。</br>
+（3）通过变化不同的script，尝试绕过后台过滤机制。</br>
+<h4>3、安全策略</h4>
+（1）输入时：严格过滤单引号，双引号，尖括号。</br>
+​ 记住一点：不要相信任何输入的内容。例如用户名只能以字母和数字组合，手机号码只能有 11 位且全部为数字，否则即为非法。这些格式检查类似于白名单效果，限制输入允许的字符，让一下特殊字符的攻击失效。</br>
+（2）输出时：对单引号，双引号，尖括号等转化为HTML实体。</br>
+<h3>三、csrf</h3>
+<h4>1、原理</h4>
+​ CSRF（Cross-Site Request Forgery，跨站点伪造请求）是一种网络攻击方式，该攻击可以在受害者毫不知情的情况下以受害者名义伪造请求发送给受攻击站点，从而在未授权的情况下执行在权限保护之下的操作，具有很大的危害性。</br>
+<h4>2、如何确认一个web系统纯在CRSF漏洞</h4>
+（1）对目标网站增删查改的地方进行标记，并观察其逻辑，判断是否可以被伪造</br>
+–比如修改管理员账号时，并不需要验证旧密码，导致请求容易被伪造；</br>
+–比如对于敏感信息的修改并没有使用安全的token验证，导致请求容易被伪造；</br>
+（2）确认凭证的有效日期（这个问题会提高CRSF被利用的概率）</br>
+–虽然退出并关闭了浏览器，但cookie仍然有效，或者session并没有及时过期，导致CRSF攻击变的简单。</br>
+<h4>3、防御措施</h4>
+（1）验证HTTP Referer字段</br>
+（2）在请求地址中添加token并验证，后端生成token发送到前端，前端提交到后端在进行验证。</br>
+（3）在HTTP头中自定义属性并验证</br>
+（4）在服务端区严格区分好POST与GET的数据请求（建议不要使用GET请求进行持久性操作）</br>
+（5）使用验证码或者密码确认方式进行</br>
+<h3>四、SQL注入</h3>
+<h4>1、概述</h4>
+<h4>2、形成原因</h4>
+什么是SQL注入攻击</br>
+攻击者在HTTP请求中注入恶意的SQL代码，服务器使用参数构建数据库SQL命令时，恶意SQL被一起构造，并在数据库中执行。</br>
+用户登录，输入用户名 lianggzone，密码 ‘ or ‘1’=’1 ，如果此时使用参数构造的方式，就会出现</br>
+select * from user where name = ‘lianggzone’ and password = ‘’ or ‘1’=‘1’</br>
+不管用户名和密码是什么内容，使查询出来的用户列表不为空。如何防范SQL注入攻击使用预编译的PrepareStatement是必须的，但是一般我们会从两个方面同时入手。</br>
+Web端</br>
+1）有效性检验。</br>
+2）限制字符串输入的长度。</br>
+服务端</br>
+1）不用拼接SQL字符串。</br>
+2）使用预编译的PrepareStatement。</br>
+3）有效性检验。(为什么服务端还要做有效性检验？第一准则，外部都是不可信的，防止攻击者绕过Web端请求)</br>
+4）过滤SQL需要的参数中的特殊字符。比如单引号、双引号。</br>
+<h3>五、RCE</h3>
+<h4>1、RCE(remote command/code execute)概述</h4>
+RCE漏洞，可以让攻击者直接向后台服务器远程注入操作系统命令或者代码，从而控制后台系统。</br>
+远程系统命令执行</br>
+​ 一般出现这种漏洞，是因为应用系统从设计上需要给用户提供指定的远程命令操作的接口。</br>
+​ 比如我们常见的路由器、防火墙、入侵检测等设备的web管理界面上一般会给用户提供一个ping操作的web界面，用户从web界面输入目标IP，提交后，后台会对该IP地址进行一次ping测试，并返回测试结果，而，如果设计者在完成该功能时，没有做严格的安全控制，则可能会导致攻击者通过该接口提交“意想不到”的命令，从而让后台进行执行，从而控制整个后台服务器。</br>
+​ 比如：127.0.0.1 & ipconfig</br>
+​ 现在很多的甲方企业都开始实施自动化运维,大量的系统操作会通过"自动化运维平台"进行操作。在这种平台上往往会出现远程系统命令执行的漏洞,不信的话现在就可以找你们运维部的系统测试一下,会有意想不到的"收获"。</br>
+shell_exec() 用于执行用户传输的命令</br>
+远程代码执行</br>
+	 同样的道理,因为需求设计,后台有时候也会把用户的输入作为代码的一部分进行执行,也就造成了远程代码执行漏洞。不管是使用了代码执行的函数,还是使用了不安全的反序列化等等。</br>
+	 因此，如果需要给前端用户提供操作类的API接口，一定需要对接口输入的内容进行严格的判断，比如实施严格的白名单策略会是一个比较好的方法。</br>
+eval() 用于执行用户传输的代码</br>
+<h3>六、文件包含漏洞</h3>
+<h4>1、概述</br></h4>
+​ 文件包含，是一个功能。在各种开发语言中都提供了内置的文件包含函数，其可以使开发人员在一个代码文件中直接包含（引入）另外一个代码文件。</br>
+	 比如 在PHP中，提供了：</br>
+	 include(),include_once()</br>
+	 require(),require_once()</br>
+	 include和require语法是相同的，除了错误处理方面：</br>
+require会生成指明错误（E_COMPLIE_ERROR）并停止脚本；</br>
+include只会生成警告（E_WARNING），并且脚本会继续；</br>
+​ 这些文件包含函数，这些函数在代码设计中被经常使用到。</br>
+​ 大多数情况下，文件包含函数中包含的代码文件是固定的，因此也不会出现安全问题。但是，有些时候，文件包含的代码文件被写成了一个变量，且这个变量可以由前端用户传进来，这种情况下，如果没有做足够的安全考虑，则可能会引发文件包含漏洞。 攻击着会指定一个“意想不到”的文件让包含函数去执行，从而造成恶意操作。根据不同的配置环境，文件包含漏洞分为如下两种情况：</br>
+	 **1.本地文件包含漏洞：**仅能够对服务器本地的文件进行包含，由于服务器上的文件并不是攻击者所能够控制的，因此该情况下，攻击着更多的会包含一些固定的系统配置文件，从而读取系统敏感信息。很多时候本地文件包含漏洞会结合一些特殊的文件上传漏洞，从而形成更大的威力。</br>
+	 防护措施：设置白名单（if函数用"||"的方式设置）</br>
+	 **2.远程文件包含漏洞：**能够通过url地址对远程的文件进行包含，这意味着攻击者可以传入任意的代码，这种情况没啥好说的，准备挂彩。因此，在web应用系统的功能设计上尽量不要让前端用户直接传变量给包含函数，如果非要这么做，也一定要做严格的白名单策略进行过滤。</br>
+​ 前提：需要php.ini配置如下</br>
+allow_url_fopen = on //默认打开</br>
+Allow_url_include = on //默认关闭</br>
+	 危害：可直接传输比如一句话木马等文件，导致客户机被控制。</br>
+<h4>2、防范措施</h4>
+（1）在功能设计上尽量不要将文件包含函数对应的文件放给全段进行选择和操作；</br>
+（2）过滤各种…/…/, http:// , https://</br>
+（3）配置php.ini配置文件</br>
+​ allow_url_fopen=off</br>
+	 allow_url_include=off</br>
+​ magic_quotes_gpc=on //gpc在</br>
+（4）通过白名单策略，进允许包含运行指定的文件，其他的都禁止；</br>
+<h3>七、不安全的文件下载和文件上传</h3>
+<h4>1、文件下载</h4>
+​ 很多网站都会提供文件下载的功能，即用户可以点击下载链接，下载到链接所对应的文件。但是如果文件下载功能不当，则可能导致攻击者可以通过构造文件路径，从未获取到后台服务器上的其他敏感文件（又称：任意文件下载）。</br>
+防范措施</br>
+（1）对传入的文件名进行严格的过滤和限定</br>
+（2）对文件下载的目录进行严格的限定</br>
+<h4>2、文件上传</h4>
+因为业务功能需求，很多web站点都有文件上传的接口，比如：</br>
+（1）注册时上传头像图片（比如jpg，png，gif等）；</br>
+（2）上传文件附件（doc，xsl等）；</br>
+而在后台开发时并没有对文件上传的文件功能进行安全考虑或者采用了有缺陷的措施，导致攻击者可以通过一些手段绕过安全措施从而上传一些恶意文件（如：一句话木马）。从而通过对该恶意文件的访问；来控制整个web后台。</br>
+<h4>3、文件上传漏洞测试流程</h4>
+（1）对文件上传的地方按照要求上传文件，查看返回结果（路径，提示等）</br>
+（2）尝试上传不同类型的"恶意"文件，比如xx.php文件，分析结果；</br>
+（3）查看html源码，看是否通过js在前端做了上传限制，可以绕过；</br>
+（4）尝试使用不同的方式进行绕过；黑白名单绕过/MIME类型绕过/目录0x00截断绕过等；</br>
+（5）猜测或者结合其他漏洞（比如敏感信息泄露）得到木马路径，连接测试</br>
+<h4>防范措施</h4>
+（1）不在前端使用js实施上传策略</br>
+（2）通过服务器对文件上传进行限制</br>
+进行多条组合检查：比如文件的大小，路径，拓展名，文件类型，文件完整性，或者设置文件后缀白名单。</br>
+对上传的文件在服务器存储是进行重命名（指定合理的命名规则）</br>
+对服务器上传文件的目录进行权限控制（比如只读），限制执行去权限带来的危害。</br>
+<h3>八、越权漏洞</h3>
+	 由于没有对用户权限进行严格判断，导致低权限的账户（比如普通用户）可以去完成高权限账号（比如超级管理员）范围内的操作。</br>
+<h4>1、水平越权</h4>
+	 A用户和B用户属于同一级别用户，但各自不能操作对方个人信息，A用户如果越权操作B用户的个人信息的情况称为平行越权操作。</br>
+<h4>2、垂直越权</h4>
+	 A用户权限高于B用户，B用户越权操作A用户权限的情况称为垂直越权。</br>
+<h4>3、修复建议</h4>
+验证一切来自客户端的参数，重点是和权限相关的参数，比如用户ID或者角色权限ID等。</br>
+session ID 和认证的token做绑定，放在服务器的会话里，不发送给客户端。</br>
+对于用户登录后涉及用户唯一信息的请求，每次都要验证检查所有权，敏感信息页面加随机数的参数，防止浏览器缓存内容。</br>
+把程序分成匿名，授权和管理的区域，通过将角色和数据功能匹配。</br>
+不适用参数来区分管理员和普通用户。</br>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[🖥️HTTP超文本传输协议]]></title>
+        <id>https://mofengkumalu.github.io/post/Net-Sec-1/</id>
+        <link href="https://mofengkumalu.github.io/post/Net-Sec-1/">
+        </link>
+        <updated>2022-04-05T16:00:00.000Z</updated>
+        <content type="html"><![CDATA[<h3>请求消息 - request</h3>
+<h4>HTTP常见八种请求方式：</h4>
+🔗<a href="https://www.cnblogs.com/andy0816/p/15566812.html" οnclick="window.open;return false"> HTTP协议支持的8种请求方法 </a></br>
+<h4>HTTP请求的方法：</h4>
+HTTP/1.1协议中共定义了八种方法（有时也叫“动作”）,来表明Request-URL指定的资源不同的操作方式
+HTTP1.0定义了三种请求方法： GET, POST 和 HEAD方法。
+HTTP1.1新增了五种请求方法：OPTIONS, PUT, DELETE, TRACE 和 CONNECT 方法</br>
+但其实我们大部分情况下只用到了GET和POST。如果想设计一个符合RESTful规范的web应用程序,则这六种方法都会用到。不过即使暂时不想涉及REST,了解这六种方法的本质仍然是很有作用的。大家将会发现,原来web也是很简洁明了的。下面依次说明这六种方法。</br>
+1、GET：</br>GET可以说是最常见的了,它本质就是发送一个请求来取得服务器上的某一资源。资源通过一组HTTP头和呈现据（如HTML文本,或者图片或者视频等）返回给客户端。GET请求中,永远不会包含呈现数据。</br>
+2、HEAD：</br>HEAD和GET本质是一样的,区别在于HEAD不含有呈现数据,而仅仅是HTTP头信息。有的人可能觉得这个方法没什么用,其实不是这样的。想象一个业务情景：欲判断某个资源是否存在,我们通常使用GET,但这里用HEAD则意义更加明确。</br>
+head()方法将HEAD请求发送到指定的url。当您不需要文件的内容时,HEAD请求会完成,但只需要status_code或HTTP标头。</br>
+3、PUT：</br>这个方法比较少见。HTML表单也不支持这个。本质上来讲, PUT和POST极为相似,都是向服务器发送数据,但它们之间有一个重要区别,PUT通常指定了资源的存放位置,而POST则没有,POST的数据存放位置由服务器自己决定。
+举例子：</br>如一个用于提交博文的URL,/addBlog。如果用PUT,则提交的URL会是像这样的”/addBlog/abc123”,其中abc123就是这个博文的地址。而如果用POST,则这个地址会在提交后由服务器告知客户端。目前大部分博客都是这样的。显然,PUT和POST用途是不一样的。具体用哪个还取决于当前的业务场景。</br>
+4、DELETE：</br>删除某一个资源。基本上这个也很少见,不过还是有一些地方比如amazon的S3云服务里面就用的这个方法来删除资源。</br>
+5、POST：</br>向服务器提交数据。这个方法用途广泛,几乎目前所有的提交操作都是靠这个完成。</br>
+6、OPTIONS：</br>这个方法很有趣,但极少使用。它用于获取当前URL所支持的方法。若请求成功,则它会在HTTP头中包含一个名为“Allow”的头,值是所支持的方法,如“GET, POST”。</br>
+获取http服务器支持的http请求方法,允许客户端查看服务器的性能,比如ajax跨域时的预检等。</br>
+JavaScript的XMLHttpRequest对象进行CORS跨域资源共享时,就是使用OPTIONS方法发送嗅探请求,以判断是否有对指定资源的访问权限。 允许</br>
+7、TRACE,TRACE请求服务器回显其收到的请求信息,该方法主要用于HTTP请求的测试或诊断。不过这个基本上不会用到,</br>
+8、CONNECT方法是HTTP/1.1协议预留的,能够将连接改为管道方式的代理服务器。通常用于SSL加密服务器的链接与非加密的HTTP代理服务器的通信。这个也是用的比较少</br>
+我们可以跟数据库的CRUD增删改查操作对应起来：</br>
+CREATE ：PUT READ：GET UPDATE：POST DELETE：DELETE</br>
+这样一来就实现了HTTP和数据库操作（其实不光是数据库,任何数据如文件图表都是这样）的完美统一,这也是REST的精髓之一</br>
+<h4>常用get，post</h4>
+get请求：请求参数在url地址中，url有大小限制（字符数据，只有一次TCP连接）</br>
+post请求：请求参数在请求体中，无大小限制（字符，字节数据，根据浏览器会有多次TCP连接）</br>
+<h4>Host：请求主机域名</h4>
+User-Agent：告诉服务器浏览器的版本信息，解决兼容性问题</br>
+Accept-Encoding：浏览器申明自己可以接受的编码方式</br>
+Accept-Language：浏览器申明自己可以接受的语言</br>
+Cookie：为了辨别用户身份，进行Session跟踪而储存在用户本地上的数据（通常经过加密），</br>
+客户端计算机暂时或永久保存的信息</br>
+<h4>状态码</h4>
+1xx：服务器接受未完成</br>
+2xx：成功 200</br>
+3xx：重定向，302 ，304访问缓存</br>
+4xx：客户端错误，404没有找到对应资源，405请求方法不被允许</br>
+5xx：服务器错误，500服务器内部出现异常
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[🌃卯榫結構]]></title>
+        <id>https://mofengkumalu.github.io/post/Daily-4/</id>
+        <link href="https://mofengkumalu.github.io/post/Daily-4/">
+        </link>
+        <updated>2022-03-19T13:10:00.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://imgtu.com/i/O3AmU1"><img src="https://s1.ax1x.com/2022/05/08/O3AmU1.jpg" alt="O3AmU1.jpg" border="0" /></a></p>
+<h1 style="font-size: 20px; text-align:center;">木工藝術卯榫</h1>
+</br>
+<h2 style="font-size: 16px; text-align:center;">來感受下細木工藝的魅力：</h2>
+<p><a href="https://imgtu.com/i/O3EuZj"><img src="https://s1.ax1x.com/2022/05/08/O3EuZj.gif" alt="O3EuZj.gif" border="0"></a><br>
+</br></p>
+<h2 style="font-size: 16px; text-align:center;">三塊帶有不同凹凸程度的長方體，通過組合、鎖定可以形成一個固定的多面體。</h2>
+<p><a href="https://imgtu.com/i/O3EmLQ"><img src="https://s1.ax1x.com/2022/05/08/O3EmLQ.gif" alt="O3EmLQ.gif" border="0"></a><br>
+</br></p>
+<h2 style="font-size: 16px; text-align:center;">它類似與縮小版的房屋腳架，仔細看，在將具有不同凹凸的長方體組合在一起之後，是利用一個小小的圓木體鎖住。</h2>
+<p><a href="https://imgtu.com/i/O3EKds"><img src="https://s1.ax1x.com/2022/05/08/O3EKds.gif" alt="O3EKds.gif" border="0"></a><br>
+<a href="https://imgtu.com/i/O3Eesg"><img src="https://s1.ax1x.com/2022/05/08/O3Eesg.gif" alt="O3Eesg.gif" border="0"></a><br>
+</br></p>
+<h2 style="font-size: 16px; text-align:center;">而這組則像是一個牆面總共有兩個構件片，一片的一側凸出，而另一片則是以凹進為主，兩片結合在一起便可鎖住，完成一個組件。</h2>
+<p><a href="https://imgtu.com/i/O3EZQS"><img src="https://s1.ax1x.com/2022/05/08/O3EZQS.gif" alt="O3EZQS.gif" border="0"></a><br>
+<a href="https://imgtu.com/i/O3EMon"><img src="https://s1.ax1x.com/2022/05/08/O3EMon.gif" alt="O3EMon.gif" border="0"></a><br>
+<a href="https://imgtu.com/i/O3Eliq"><img src="https://s1.ax1x.com/2022/05/08/O3Eliq.gif" alt="O3Eliq.gif" border="0"></a><br>
+<a href="https://imgtu.com/i/O3E1J0"><img src="https://s1.ax1x.com/2022/05/08/O3E1J0.gif" alt="O3E1J0.gif" border="0"></a><br>
+<a href="https://imgtu.com/i/O3E3WV"><img src="https://s1.ax1x.com/2022/05/08/O3E3WV.gif" alt="O3E3WV.gif" border="0"></a><br>
+<a href="https://imgtu.com/i/O3E8zT"><img src="https://s1.ax1x.com/2022/05/08/O3E8zT.gif" alt="O3E8zT.gif" border="0"></a><br>
+<a href="https://imgtu.com/i/O3Vwng"><img src="https://s1.ax1x.com/2022/05/08/O3Vwng.gif" alt="O3Vwng.gif" border="0"></a><br>
+</br></p>
+<h2 style="font-size: 16px; text-align:center;">以上这些组件也很有趣，它们是不同大小的长方体，都有不同的凹凸形成，组合在一起之后有的可以直接固定，也有的是只需要几个小圆木体便可以完成锁住。</h2>
+<a href="https://imgtu.com/i/O3V0BQ"><img src="https://s1.ax1x.com/2022/05/08/O3V0BQ.gif" alt="O3V0BQ.gif" border="0"></a>
+</br>
+<h2 style="font-size: 16px; text-align:center;">而这个可以算是相对复杂一些的，它是由五个小构件组成的完整体，彼此之间分别锁定才能完成这个构件的组装。</h2>
+</br>
+<div class="box" style="text-align: center; float: right; font-size: 20px;">
+𝑨𝒅𝒅𝒓𝒆𝒔𝒔：<a href="https://google-maps.gosur.com/cn/?ll=22.645769127676914,113.24018699999999&z=12.08012298459565&t=streets" οnclick="window.open;return false" style="color: black
+; font-size: 20px;  text-decoration: underline">𝑯𝒐𝒎𝒆 </a>
+</div>]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[🔗H3C《2021年网络安全漏洞态势报告》]]></title>
+        <id>https://mofengkumalu.github.io/post/0Day-1/</id>
+        <link href="https://mofengkumalu.github.io/post/0Day-1/">
+        </link>
+        <updated>2022-02-28T16:00:00.000Z</updated>
+        <content type="html"><![CDATA[<div class="box" style="text-align: center;">
+<a href="https://mp.weixin.qq.com/s/qG6zaa8LDTKAiBi7UIA9Pg" οnclick="window.open;return false" style="color: black
+; font-size: 46px;  text-decoration: underline"> 𝑯<span><i>3</i></span>𝑪 𝑵𝒆𝒕-𝑺𝒆𝒄 𝑹𝒆𝒑𝒐𝒓𝒕 </a>
+</div>]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[💁 值得？還是不值得🍣]]></title>
+        <id>https://mofengkumalu.github.io/post/Daily-3/</id>
+        <link href="https://mofengkumalu.github.io/post/Daily-3/">
+        </link>
+        <updated>2022-02-25T13:20:00.000Z</updated>
+        <content type="html"><![CDATA[<p><a href="https://imgtu.com/i/O3ZLin"><img src="https://s1.ax1x.com/2022/05/08/O3ZLin.jpg" alt="O3ZLin.jpg" border="0" /></a></p>
+<p align="center">罪魁禍首 👇🏻 </p>
+<p><a href="https://imgtu.com/i/O3eSLF"><img src="https://s1.ax1x.com/2022/05/08/O3eSLF.jpg" alt="O3eSLF.jpg" border="0" /></a></p>
+<h1 style="font-size: 20px; text-align:center;">説好的一年只吃一次刺身🍣</br>
+爽是挺爽的~ 畢竟因爲腸胃炎加上網課時間呐，差不多一個月沒回學校上課了欸</h1>
+</br>
+</br>
+</br>
+<div class="box" style="text-align: center; float: right; font-size: 20px;">
+𝑨𝒅𝒅𝒓𝒆𝒔𝒔：<a href="https://google-maps.gosur.com/cn/?ll=22.84363646638667,113.19519815000001&z=10.849913861882898&t=streets" οnclick="window.open;return false" style="color: black
+; font-size: 20px;  text-decoration: underline">𝑺𝒉𝒖𝒏𝒅𝒆 𝑫𝒊𝒔𝒕𝒓𝒊𝒄𝒕, 𝑭𝒐𝒔𝒉𝒂𝒏, 𝑮𝒖𝒂𝒏𝒈𝒅𝒐𝒏𝒈</a>
+</div>]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[🙋 𝐷𝑎𝑖𝑙𝑦 𝐿𝑖𝑓𝑒 | 𝐴𝑐𝑎𝑑𝑒𝑚𝑖𝑐 𝑅𝑒𝑠𝑒𝑎𝑟𝑐ℎ | 𝐻𝑖𝑠𝑡𝑜𝑟𝑦 𝑃𝑜𝑝𝑢𝑙𝑎𝑟𝑖𝑧𝑎𝑡𝑖𝑜𝑛]]></title>
+        <id>https://mofengkumalu.github.io/post/Daily page/</id>
+        <link href="https://mofengkumalu.github.io/post/Daily page/">
+        </link>
+        <updated>2021-12-31T16:00:00.000Z</updated>
+        <content type="html"><![CDATA[<h1 style="font-size: 46px; text-align:center;">𝓗𝓲, 𝓽𝓱𝓮𝓻𝓮!</h1>]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[漏洞发展趋势]]></title>
+        <id>https://mofengkumalu.github.io/post/0Day-2/</id>
+        <link href="https://mofengkumalu.github.io/post/0Day-2/">
+        </link>
+        <updated>2020-05-20T16:00:00.000Z</updated>
+        <content type="html"><![CDATA[<p>以NVD为数据源，对1999-2019年的漏洞数据进行回顾分析，结合绿盟威胁情报中心监测到的漏洞利用攻击事件，从通用系统、软件的漏洞呈现情况，总结了20年来漏洞研究及利用的趋势，并对近几年新兴的移动、物联网设备等领域的漏洞发展进行回顾和展望。<br>
+</br><br>
+<a href="https://imgtu.com/i/O3eOTH"><img src="https://s1.ax1x.com/2022/05/08/O3eOTH.png" alt="O3eOTH.png" border="0" /></a><br>
+</br><br>
+<a href="https://imgtu.com/i/O3evtA"><img src="https://s1.ax1x.com/2022/05/08/O3evtA.png" alt="O3evtA.png" border="0" /></a></p>
+<p align="center">历年漏洞数量统计</p>
+</br>
+截至2019年底，NVD数据库共收录漏洞信息138909条。2019年的漏洞数量同比1999年，增长了9.62倍。
+<p><a href="https://imgtu.com/i/O3minS"><img src="https://s1.ax1x.com/2022/05/08/O3minS.png" alt="O3minS.png" border="0" /></a></p>
+<p align="center">漏洞的 CVSS V2.0 分布</p>
+</br>
+截止 2019 年底共有 130937 条漏洞分配了 CVSS V2.0 等级，中危漏洞占 56.06%，高危漏洞占据 35.22%。
+<p><a href="https://imgtu.com/i/O3mZhn"><img src="https://s1.ax1x.com/2022/05/08/O3mZhn.png" alt="O3mZhn.png" border="0" /></a></p>
+<p align="center">TOP20 CWE 漏洞类型</p>
+跨站脚本 (CWE-79) 类型的漏洞数量以 12911 条占据第一。
+</br>
+攻击者眼中，十年以上“高龄”漏洞依旧“好使”
+</br>
+<p><a href="https://imgtu.com/i/O3mGN9"><img src="https://s1.ax1x.com/2022/05/08/O3mGN9.png" alt="O3mGN9.png" border="0" /></a></p>
+<p align="center">攻击事件使用到的漏洞按年分布</p>
+攻击者关注稳定、高效的漏洞利用技术，在漏洞的选择上追求易用性、时效性以及是否能获取目标控制权限的攻击能力。可以看到，即使是在 2019 年，十年以上的高龄漏洞仍然占据了相当大的比例，说明互联网上依然存在着大量长期未更新的软件和系统。
+</br>
+警惕！利用文件格式漏洞的鱼叉式钓鱼攻击
+<p><a href="https://imgtu.com/i/O3majK"><img src="https://s1.ax1x.com/2022/05/08/O3majK.png" alt="O3majK.png" border="0" /></a></p>
+<p align="center">文档类型漏洞分布</p>
+通过对APT攻击的研究发现，利用文件格式漏洞的鱼叉式钓鱼攻击已成为网络安全的主要威胁之一。PDF、doc(x)、xls(x)、ppt(x) 等文件格式具有跨平台、应用范围广、用户基数大的特点，受到了攻击者的持续关注，目标主机上的相应程序一旦存在安全漏洞就会被轻易攻破。
+</br>
+开源软件面临漏洞利用和软件供应链的双重攻击
+<p><a href="https://imgtu.com/i/O3mhDS"><img src="https://s1.ax1x.com/2022/05/08/O3mhDS.png" alt="O3mhDS.png" border="0" /></a></p>
+<p align="center">常见开源软件的漏洞数量</p>
+开源软件具有开放、免费、功能灵活等特点，得到了越来越广泛的应用，但是安全问题仍然普遍存在。公开的利用代码在短时间内被集成到成熟的攻击框架或木马程序中，进一步降低了漏洞利用的门槛，而从漏洞公布到被攻击者大规模利用的时间窗口也在进一步缩短，给安全厂商防护能力带来了更大的挑战。
+</br>
+针对软件供应链的攻击，成为面向软件开发人员和供应商的一种新兴威胁。针对软件供应链的攻击在传播速度上更快、影响范围更广、危害更大，同时也更隐蔽。软件开发商应该制定软件供应链标准、规范，遵循安全的开发流程，定期组织软件供应链攻防演练竞赛，定期对自身网站、软件等进行检测与加固，以减少受到此类攻击的风险。
+</br>
+物联网安全的价值不应只在受到威胁时才被重视
+</br>
+据市场研究公司 Gartner 称， 2016 年全球物联网设备数量为 64 亿，2020 年将达到 204 亿 ，增长 218.75%，但是目前物联网建设过程中考虑到信息安全的产品极少，绝大部分是“裸奔”状态。
+</br>
+<p><a href="https://imgtu.com/i/O3np59"><img src="https://s1.ax1x.com/2022/05/08/O3np59.png" alt="O3np59.png" border="0" /></a></p>
+<p align="center">2019年 TOP10 物联网漏洞利用数量</p>
+</br>
+面对物联网的威胁，设备制造商应当重视设备的安全，指定安全的开发流程，对设备进行全面的安全测试。对于默认密码的问题，应当在用户第一次使用的时候，强制让用户修改密码，并检查用户密码的安全性，禁止设置弱密码。对使用周期较长的设备，定期提供可更新的固件，以确保设备的安全性。
+</br>
+总结：“安全左移”，从源头上减少漏洞的产生
+</br>
+安全是一个攻与防的过程，未知攻焉知防，只有在了解各种攻击技术和手段后才能采取更加有效的防御策略，从而避免安全事件的发生。软件开发人员不仅需要熟练的编程技巧，还需要重视“安全左移”，即在开发阶段进行安全加固、代码审计，将安全属性融入到软件的开发过程中，从源头上减少漏洞的产生。 
+</br>
+安全研究人员需要加强系统漏洞及防护技术等方面的学习，不断深入研究新的漏洞挖掘和利用技术，挑战各种漏洞的缓解措施，先攻击者一步掌握最新的攻击技术，才能与安全厂商携手，进一步提高系统和应用的安全防护水平。
+]]></content>
+    </entry>
+</feed>
